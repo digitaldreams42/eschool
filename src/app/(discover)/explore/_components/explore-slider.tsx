@@ -66,13 +66,13 @@ const ExploreSlider = ({ label, query, text }: Props) => {
           }}
         >
           {groups.map((group) => (
-            <SwiperSlide key={`initial-${group.id}`}>
+            <SwiperSlide key={group.id}>
               <GroupCard {...group} />
             </SwiperSlide>
           ))}
           {fetchedData?.status === 200 &&
             data.map((group: any) => (
-              <SwiperSlide key={`fetched-${group.id}`}>
+              <SwiperSlide key={group.id}>
                 <GroupCard {...group} />
               </SwiperSlide>
             ))}

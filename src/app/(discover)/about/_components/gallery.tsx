@@ -23,7 +23,7 @@ const MediaGallery = ({
   return (
     <div className="flex justify-start gap-3 flex-wrap">
       {gallery.length > 0 &&
-        gallery.map((gal) =>
+        gallery.map((gal, key) =>
           validateURLString(gal).type === "IMAGE" ? (
             <img
               onClick={() =>
@@ -32,14 +32,14 @@ const MediaGallery = ({
                   type: "IMAGE",
                 })
               }
-              key={gal}
+              key={key}
               src={`https://ucarecdn.com/${gal}/`}
               alt="gallery-img"
               className="aspect-video w-36 rounded-xl cursor-pointer opacity-70"
             />
           ) : validateURLString(gal).type === "LOOM" ? (
             <div
-              key={gal}
+              key={key}
               className="w-36 aspect-video relative cursor-pointer opacity-70"
             >
               <div
@@ -58,7 +58,7 @@ const MediaGallery = ({
             </div>
           ) : (
             <div
-              key={gal}
+              key={key}
               className="w-36 aspect-video relative opacity-70 cursor-pointer"
             >
               <div
@@ -77,7 +77,7 @@ const MediaGallery = ({
                 allowFullScreen
               ></iframe>
             </div>
-          )
+          ),
         )}
       {userid === groupUserid ? (
         <GlassModal

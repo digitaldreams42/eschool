@@ -1,25 +1,94 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================================================================== */
+/*  eSchool design tokens                                             */
+/* ================================================================== */
+:root {
+  --font-display: "Fraunces", ui-serif, Georgia, "Times New Roman", serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+
+  /* semantic tokens (raw HSL triplets consumed by tailwind.config.ts) */
+  --background: 216 30% 4%;
+  --foreground: 40 24% 95%;
+
+  --card: 216 24% 7%;
+  --card-foreground: 40 24% 95%;
+
+  --popover: 216 24% 7%;
+  --popover-foreground: 40 24% 95%;
+
+  --primary: 40 68% 58%;
+  --primary-foreground: 216 44% 5%;
+
+  --secondary: 216 16% 14%;
+  --secondary-foreground: 40 24% 95%;
+
+  --muted: 216 16% 13%;
+  --muted-foreground: 217 12% 65%;
+
+  --accent: 40 68% 58%;
+  --accent-foreground: 216 44% 5%;
+
+  --destructive: 0 68% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 216 16% 17%;
+  --input: 216 16% 17%;
+  --ring: 40 68% 58%;
+
+  --radius: 0.9rem;
+
+  /* brand */
+  --gold: #e3b24d;
+  --gold-deep: #c8972b;
+  --ink: #070a0e;
+  --ink-2: #0b0f14;
+  --ink-3: #10161d;
 }
 
-html {
-  scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100vh;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background: rgba(227, 178, 77, 0.3);
+    color: #fff;
+  }
+
+  /* thin, on-brand scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #070a0e;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #22282f;
+    border-radius: 999px;
+    border: 2px solid #070a0e;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #333b44;
+  }
 }
 
-body {
-  min-height: 100vh;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* MUI-compatible resets */
+/* ================================================================== */
+/*  Legacy resets / MUI compatibility                                 */
+/* ================================================================== */
 .MuiButton-root {
   text-transform: none;
 }
@@ -28,6 +97,121 @@ a {
   background-image: none;
 }
 
+/* ================================================================== */
+/*  Atmosphere helpers                                                */
+/* ================================================================== */
+
+/* fine film grain, overlay it on a positioned parent */
+.es-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0.045;
+  mix-blend-mode: overlay;
+}
+
+/* faint blueprint grid */
+.es-grid-bg {
+  background-image: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.045) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 58px 58px;
+}
+
+/* radial mask so the grid fades toward the edges */
+.es-mask-radial {
+  -webkit-mask-image: radial-gradient(
+    ellipse 70% 60% at 50% 0%,
+    #000 20%,
+    transparent 78%
+  );
+  mask-image: radial-gradient(
+    ellipse 70% 60% at 50% 0%,
+    #000 20%,
+    transparent 78%
+  );
+}
+
+/* soft gold bloom behind hero content */
+.es-bloom {
+  background: radial-gradient(
+    ellipse 55% 55% at 50% 40%,
+    rgba(227, 178, 77, 0.22),
+    rgba(227, 178, 77, 0.06) 45%,
+    transparent 72%
+  );
+}
+
+.es-hairline {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* gold gradient text for key phrases */
+.es-gold-text {
+  background: linear-gradient(100deg, #f4d28a 0%, #e3b24d 42%, #b8842a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* animated gradient sweep for badges / borders */
+.es-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.14) 42%,
+    transparent 62%
+  );
+  background-size: 220% 100%;
+  animation: es-shimmer 3.4s linear infinite;
+}
+
+@keyframes es-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
+}
+
+@keyframes es-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes es-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes es-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* ================================================================== */
+/*  Legacy utilities (kept for the rest of the app)                   */
+/* ================================================================== */
 .radial {
   background-image: radial-gradient(
     ellipse farthest-side,
@@ -98,76 +282,28 @@ a {
 }
 
 .img--overlay {
-  background-image: -webkit-linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0),
-    rgba(0, 0, 0, 1)
-  ); /* For Chrome 25 and Safari 6, iOS 6.1, Android 4.3 */
-  background-image: -moz-linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0),
-    rgba(0, 0, 0, 1)
-  ); /* For Firefox (3.6 to 15) */
-  background-image: -o-linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0),
-    rgba(0, 0, 0, 1)
-  ); /* For old Opera (11.1 to 12.0) */
   background-image: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0),
     rgba(0, 0, 0, 1)
-  ); /* Standard syntax; must be last */
+  );
 }
 
 .slider-overlay {
-  background-image: -webkit-linear-gradient(
-    to right,
-    rgba(0, 0, 0, 1),
-    rgba(0, 0, 0, 0)
-  ); /* For Chrome 25 and Safari 6, iOS 6.1, Android 4.3 */
-  background-image: -moz-linear-gradient(
-    to right,
-    rgba(0, 0, 0, 1),
-    rgba(0, 0, 0, 0)
-  ); /* For Firefox (3.6 to 15) */
-  background-image: -o-linear-gradient(
-    to right,
-    rgba(0, 0, 0, 1),
-    rgba(0, 0, 0, 0)
-  ); /* For old Opera (11.1 to 12.0) */
   background-image: linear-gradient(
     to right,
     rgba(0, 0, 0, 1),
     rgba(0, 0, 0, 0)
-  ); /* Standard syntax; must be last */
+  );
 }
 
 .slider-overlay-rev {
-  background-image: -webkit-linear-gradient(
-    to right,
-    rgba(0, 0, 0, 0),
-    rgba(0, 0, 0, 0.8),
-    rgba(0, 0, 0, 1)
-  ); /* For Chrome 25 and Safari 6, iOS 6.1, Android 4.3 */
-  background-image: -moz-linear-gradient(
-    to right,
-    rgba(0, 0, 0, 0),
-    rgba(0, 0, 0, 0.8),
-    rgba(0, 0, 0, 1)
-  ); /* For Firefox (3.6 to 15) */
-  background-image: -o-linear-gradient(
-    to right,
-    rgba(0, 0, 0, 0),
-    rgba(0, 0, 0, 0.8),
-    rgba(0, 0, 0, 1)
-  ); /* For old Opera (11.1 to 12.0) */
   background-image: linear-gradient(
     to right,
     rgba(0, 0, 0, 0),
     rgba(0, 0, 0, 0.8),
     rgba(0, 0, 0, 1)
-  ); /* Standard syntax; must be last */
+  );
 }
 
 .tiptap p.is-editor-empty:first-child::before {
@@ -176,4 +312,18 @@ a {
   float: left;
   height: 0;
   pointer-events: none;
+}
+
+/* ================================================================== */
+/*  Accessibility                                                     */
+/* ================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

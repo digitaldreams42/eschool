@@ -2,46 +2,43 @@
 
 import { createTheme, ThemeOptions } from '@mui/material/styles';
 
-const roboto = {
-  style: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-  },
-};
+const FONT_SANS =
+  '"Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif';
+const FONT_DISPLAY = '"Fraunces", ui-serif, Georgia, "Times New Roman", serif';
 
-const ibmPlexSans = {
-  style: {
-    fontFamily: '"IBM Plex Sans", "Roboto", "Helvetica", "Arial", sans-serif',
-  },
-};
-
-// ZMP Tech palette (from Zolemba app_theme.dart)
-const zmpColors = {
-  primary: '#3B82F6',
-  secondary: '#60A5FA',
-  cta: '#F97316',
-  background: '#F8FAFC',
-  text: '#1E293B',
-  textMuted: '#64748B',
-  surface: '#FFFFFF',
-  border: '#E2E8F0',
-  success: '#22C55E',
+/**
+ * eSchool brand palette — deep ink canvas + warm gold accent.
+ * Exported as `zmpColors` for backwards compatibility with the
+ * thin MUI wrappers in `src/components/mui/*`.
+ */
+export const zmpColors = {
+  primary: '#E3B24D',
+  secondary: '#F4D28A',
+  cta: '#E3B24D',
+  background: '#070A0E',
+  text: '#F5F1EA',
+  textMuted: '#9BA3AE',
+  surface: '#0B0F14',
+  border: 'rgba(255,255,255,0.09)',
+  success: '#34D399',
   danger: '#EF4444',
   warning: '#F59E0B',
 };
 
 const themeOptions: ThemeOptions = {
   palette: {
+    mode: 'dark',
     primary: {
       main: zmpColors.primary,
       light: zmpColors.secondary,
-      dark: '#2563EB',
-      contrastText: '#FFFFFF',
+      dark: '#C8972B',
+      contrastText: '#0A0E12',
     },
     secondary: {
-      main: zmpColors.cta,
-      light: '#FB923C',
-      dark: '#EA580C',
-      contrastText: '#FFFFFF',
+      main: '#7FD1B9',
+      light: '#A6E3D1',
+      dark: '#4FAF94',
+      contrastText: '#06120E',
     },
     error: {
       main: zmpColors.danger,
@@ -50,8 +47,8 @@ const themeOptions: ThemeOptions = {
     },
     success: {
       main: zmpColors.success,
-      light: '#4ADE80',
-      dark: '#16A34A',
+      light: '#6EE7B7',
+      dark: '#059669',
     },
     warning: {
       main: zmpColors.warning,
@@ -69,47 +66,49 @@ const themeOptions: ThemeOptions = {
     divider: zmpColors.border,
   },
   typography: {
-    fontFamily: roboto.style.fontFamily,
+    fontFamily: FONT_SANS,
     h1: {
-      fontFamily: ibmPlexSans.style.fontFamily,
+      fontFamily: FONT_DISPLAY,
       fontWeight: 600,
-      fontSize: '2.5rem',
+      fontSize: '2.75rem',
       letterSpacing: '-0.02em',
+      lineHeight: 1.05,
     },
     h2: {
-      fontFamily: ibmPlexSans.style.fontFamily,
+      fontFamily: FONT_DISPLAY,
       fontWeight: 600,
-      fontSize: '2rem',
+      fontSize: '2.1rem',
       letterSpacing: '-0.02em',
+      lineHeight: 1.12,
     },
     h3: {
-      fontFamily: ibmPlexSans.style.fontFamily,
+      fontFamily: FONT_DISPLAY,
       fontWeight: 600,
-      fontSize: '1.5rem',
+      fontSize: '1.6rem',
       letterSpacing: '-0.01em',
     },
     h4: {
-      fontFamily: ibmPlexSans.style.fontFamily,
+      fontFamily: FONT_DISPLAY,
       fontWeight: 600,
-      fontSize: '1.25rem',
+      fontSize: '1.3rem',
     },
     h5: {
-      fontFamily: ibmPlexSans.style.fontFamily,
+      fontFamily: FONT_DISPLAY,
       fontWeight: 600,
       fontSize: '1.125rem',
     },
     h6: {
-      fontFamily: ibmPlexSans.style.fontFamily,
+      fontFamily: FONT_DISPLAY,
       fontWeight: 600,
       fontSize: '1rem',
     },
     body1: {
       fontSize: '1rem',
-      lineHeight: 1.5,
+      lineHeight: 1.6,
     },
     body2: {
-      fontSize: '0.875rem',
-      lineHeight: 1.43,
+      fontSize: '0.9rem',
+      lineHeight: 1.55,
     },
     button: {
       fontWeight: 600,
@@ -118,7 +117,7 @@ const themeOptions: ThemeOptions = {
     },
   },
   shape: {
-    borderRadius: 12,
+    borderRadius: 14,
   },
   components: {
     MuiButton: {
@@ -128,12 +127,12 @@ const themeOptions: ThemeOptions = {
           padding: '10px 20px',
           boxShadow: 'none',
           '&:hover': {
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.35)',
           },
         },
         contained: {
           '&:hover': {
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            boxShadow: '0 6px 18px rgba(227,178,77,0.25)',
           },
         },
       },
@@ -142,7 +141,7 @@ const themeOptions: ThemeOptions = {
       styleOverrides: {
         root: {
           borderRadius: 16,
-          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
           border: `1px solid ${zmpColors.border}`,
         },
       },
@@ -191,4 +190,3 @@ const themeOptions: ThemeOptions = {
 };
 
 export const theme = createTheme(themeOptions);
-export { zmpColors };

@@ -1,8 +1,11 @@
-import dynamic from "next/dynamic"
+import nextDynamic from "next/dynamic"
+import { Box, Container } from "@mui/material"
 import CallToAction from "./_components/call-to-action"
 import DashboardSnippet from "./_components/dashboard-snippet"
 
-const PricingSection = dynamic(
+export const dynamic = "force-dynamic"
+
+const PricingSection = nextDynamic(
   () =>
     import("./_components/pricing").then(
       (component) => component.PricingSection,
@@ -12,12 +15,12 @@ const PricingSection = dynamic(
 
 export default function Home() {
   return (
-    <main className="md:px-10 py-20 flex flex-col gap-36">
-      <div>
+    <Box sx={{ py: { xs: 8, md: 12 }, display: 'flex', flexDirection: 'column', gap: { xs: 12, md: 16 } }}>
+      <Container maxWidth="lg">
         <CallToAction />
         <DashboardSnippet />
-      </div>
+      </Container>
       <PricingSection />
-    </main>
+    </Box>
   )
 }

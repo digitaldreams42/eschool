@@ -15,7 +15,7 @@ const CourseList = ({ groupid }: Props) => {
     return <></>
   }
 
-  return data.courses?.map((course) => (
+  return data.courses?.map((course: any) => (
     <Link href={`/group/${groupid}/courses/${course.id}`} key={course.id}>
       <Card className="bg-transparent border-themeGray h-full rounded-xl overflow-hidden">
         <img

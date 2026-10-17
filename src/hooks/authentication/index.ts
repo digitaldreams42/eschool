@@ -1,18 +1,18 @@
-import { onSignUpUser } from "@/actions/auth"
-import { SignUpSchema } from "@/components/forms/sign-up/schema"
-import { useSignIn, useSignUp } from "@clerk/nextjs"
-import { OAuthStrategy } from "@clerk/types"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation } from "@tanstack/react-query"
+"use client"
+
+import { useAuth } from "@/hooks/use-auth"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { z } from "zod"
-import { SignInSchema } from "../../components/forms/sign-in/schema"
+import { SignInSchema } from "@/components/forms/sign-in/schema"
+import { SignUpSchema } from "@/components/forms/sign-up/schema"
 
 export const useAuthSignIn = () => {
-  const { isLoaded, setActive, signIn } = useSignIn()
+  const { refresh } = useAuth()
   const {
     register,
     formState: { errors },
@@ -24,36 +24,39 @@ export const useAuthSignIn = () => {
   })
 
   const router = useRouter()
-  const onClerkAuth = async (email: string, password: string) => {
-    if (!isLoaded)
-      return toast("Error", {
-        description: "Oops! something went wrong",
-      })
+
+  const onAuthenticate = async (email: string, password: string) => {
     try {
-      const authenticated = await signIn.create({
-        identifier: email,
-        password: password,
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       })
 
-      if (authenticated.status === "complete") {
+      const data = await res.json()
+
+      if (res.ok) {
         reset()
-        await setActive({ session: authenticated.createdSessionId })
+        await refresh()
         toast("Success", {
           description: "Welcome back!",
         })
         router.push("/callback/sign-in")
-      }
-    } catch (error: any) {
-      if (error.errors[0].code === "form_password_incorrect")
+      } else {
         toast("Error", {
-          description: "email/password is incorrect try again",
+          description: data.error || "Email/password is incorrect, try again",
         })
+      }
+    } catch {
+      toast("Error", {
+        description: "Something went wrong",
+      })
     }
   }
 
   const { mutate: InitiateLoginFlow, isPending } = useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) =>
-      onClerkAuth(email, password),
+      onAuthenticate(email, password),
   })
 
   const onAuthenticateUser = handleSubmit(async (values) => {
@@ -69,11 +72,10 @@ export const useAuthSignIn = () => {
 }
 
 export const useAuthSignUp = () => {
-  const { setActive, isLoaded, signUp } = useSignUp()
+  const { refresh } = useAuth()
   const [creating, setCreating] = useState<boolean>(false)
   const [verifying, setVerifying] = useState<boolean>(false)
   const [code, setCode] = useState<string>("")
-
   const {
     register,
     formState: { errors },
@@ -88,83 +90,50 @@ export const useAuthSignUp = () => {
   const router = useRouter()
 
   const onGenerateCode = async (email: string, password: string) => {
-    if (!isLoaded)
+    if (email && password) {
+      setVerifying(true)
+    } else {
       return toast("Error", {
-        description: "Oops! something went wrong",
+        description: "No fields must be empty",
       })
-    try {
-      if (email && password) {
-        await signUp.create({
-          emailAddress: getValues("email"),
-          password: getValues("password"),
-        })
-
-        await signUp.prepareEmailAddressVerification({
-          strategy: "email_code",
-        })
-
-        setVerifying(true)
-      } else {
-        return toast("Error", {
-          description: "No fields must be empty",
-        })
-      }
-    } catch (error) {
-      console.error(JSON.stringify(error, null, 2))
     }
   }
 
   const onInitiateUserRegistration = handleSubmit(async (values) => {
-    if (!isLoaded)
-      return toast("Error", {
-        description: "Oops! something went wrong",
-      })
-
     try {
       setCreating(true)
-      const completeSignUp = await signUp.attemptEmailAddressVerification({
-        code,
-      })
-
-      if (completeSignUp.status !== "complete") {
-        return toast("Error", {
-          description: "Oops! something went wrong, status in complete",
-        })
-      }
-
-      if (completeSignUp.status === "complete") {
-        if (!signUp.createdUserId) return
-        const user = await onSignUpUser({
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           firstname: values.firstname,
           lastname: values.lastname,
-          clerkId: signUp.createdUserId,
-          image: "",
-        })
+          email: values.email,
+          password: values.password,
+        }),
+      })
 
+      const data = await res.json()
+
+      if (res.ok) {
         reset()
-
-        if (user.status === 200) {
-          toast("Success", {
-            description: user.message,
-          })
-          await setActive({
-            session: completeSignUp.createdSessionId,
-          })
-          router.push(`/group/create`)
-        }
-        if (user.status !== 200) {
-          toast("Error", {
-            description: user.message + "action failed",
-          })
-          router.refresh
-        }
-        setCreating(false)
-        setVerifying(false)
+        await refresh()
+        toast("Success", {
+          description: "Account created successfully!",
+        })
+        router.push("/group/create")
       } else {
-        console.error(JSON.stringify(completeSignUp, null, 2))
+        toast("Error", {
+          description: data.error || "Something went wrong",
+        })
       }
-    } catch (error) {
-      console.error(JSON.stringify(error, null, 2))
+      setCreating(false)
+      setVerifying(false)
+    } catch {
+      setCreating(false)
+      toast("Error", {
+        description: "Something went wrong",
+      })
     }
   })
 
@@ -182,33 +151,12 @@ export const useAuthSignUp = () => {
 }
 
 export const useGoogleAuth = () => {
-  const { signIn, isLoaded: LoadedSignIn } = useSignIn()
-  const { signUp, isLoaded: LoadedSignUp } = useSignUp()
-
-  const signInWith = (strategy: OAuthStrategy) => {
-    if (!LoadedSignIn) return
-    try {
-      return signIn.authenticateWithRedirect({
-        strategy,
-        redirectUrl: "/callback",
-        redirectUrlComplete: "/callback/sign-in",
-      })
-    } catch (error) {
-      console.error(error)
-    }
+  const signInWith = () => {
+    window.location.href = "/api/auth/google"
   }
 
-  const signUpWith = (strategy: OAuthStrategy) => {
-    if (!LoadedSignUp) return
-    try {
-      return signUp.authenticateWithRedirect({
-        strategy,
-        redirectUrl: "/callback",
-        redirectUrlComplete: "/callback/complete",
-      })
-    } catch (error) {
-      console.error(error)
-    }
+  const signUpWith = () => {
+    window.location.href = "/api/auth/google"
   }
 
   return { signUpWith, signInWith }

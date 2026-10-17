@@ -1,32 +1,18 @@
 "use server"
 
 import { client } from "@/lib/prisma"
-import { currentUser } from "@clerk/nextjs/server"
+import { getSession } from "@/lib/auth"
 
 export const onAuthenticatedUser = async () => {
   try {
-    const clerk = await currentUser()
-    if (!clerk) return { status: 404 }
+    const user = await getSession()
+    if (!user) return { status: 404 }
 
-    const user = await client.user.findUnique({
-      where: {
-        clerkId: clerk.id,
-      },
-      select: {
-        id: true,
-        firstname: true,
-        lastname: true,
-      },
-    })
-    if (user)
-      return {
-        status: 200,
-        id: user.id,
-        image: clerk.imageUrl,
-        username: `${user.firstname} ${user.lastname}`,
-      }
     return {
-      status: 404,
+      status: 200,
+      id: user.id,
+      image: user.image || "",
+      username: `${user.firstname} ${user.lastname}`,
     }
   } catch (error) {
     return {
@@ -39,12 +25,20 @@ export const onSignUpUser = async (data: {
   firstname: string
   lastname: string
   image: string
-  clerkId: string
+  email: string
+  password: string
 }) => {
   try {
+    const { hashPassword } = await import("@/lib/auth")
+    const passwordHash = await hashPassword(data.password)
+
     const createdUser = await client.user.create({
       data: {
-        ...data,
+        firstname: data.firstname,
+        lastname: data.lastname,
+        email: data.email,
+        passwordHash,
+        image: data.image || null,
       },
     })
 
@@ -68,12 +62,10 @@ export const onSignUpUser = async (data: {
   }
 }
 
-export const onSignInUser = async (clerkId: string) => {
+export const onSignInUser = async (email: string) => {
   try {
     const loggedInUser = await client.user.findUnique({
-      where: {
-        clerkId,
-      },
+      where: { email },
       select: {
         id: true,
         group: {

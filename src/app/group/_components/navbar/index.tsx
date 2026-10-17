@@ -4,7 +4,7 @@ import SideBar from "@/components/global/sidebar"
 import { UserWidget } from "@/components/global/user-widget"
 import { Button } from "@/components/ui/button"
 import { CheckBadge } from "@/icons"
-import { currentUser } from "@clerk/nextjs/server"
+import { getSession } from "@/lib/auth"
 import { Menu } from "lucide-react"
 import Link from "next/link"
 
@@ -14,7 +14,7 @@ type NavbarProps = {
 }
 
 export const Navbar = async ({ groupid, userid }: NavbarProps) => {
-  const user = await currentUser()
+  const session = await getSession()
   return (
     <div className="bg-[#1A1A1D] py-2 px-3 md:px-7 md:py-5 flex gap-5 justify-between md:justify-end items-center">
       <GlassSheet trigger={<Menu className="md:hidden cursor-pointer" />}>
@@ -34,7 +34,7 @@ export const Navbar = async ({ groupid, userid }: NavbarProps) => {
           Create Group
         </Button>
       </Link>
-      <UserWidget userid={userid} image={user?.imageUrl!} groupid={groupid} />
+      <UserWidget userid={userid} image={session?.image || ""} groupid={groupid} />
     </div>
   )
 }

@@ -1,12 +1,12 @@
 import { onSignInUser } from "@/actions/auth"
-import { currentUser } from "@clerk/nextjs/server"
+import { getSession } from "@/lib/auth"
 import { redirect } from "next/navigation"
 
 const CompleteSigIn = async () => {
-  const user = await currentUser()
-  if (!user) return redirect("/sign-in")
+  const session = await getSession()
+  if (!session) return redirect("/sign-in")
 
-  const authenticated = await onSignInUser(user.id)
+  const authenticated = await onSignInUser(session.email)
 
   if (authenticated.status === 200) return redirect(`/group/create`)
 

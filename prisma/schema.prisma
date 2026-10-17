@@ -14,13 +14,16 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  firstname String
-  lastname  String
-  createdAt DateTime @default(now())
-  clerkId   String   @unique
-  image     String?
-  stripeId  String?
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstname    String
+  lastname     String
+  email        String    @unique
+  passwordHash String?
+  googleId      String?   @unique
+  createdAt    DateTime  @default(now())
+  clerkId      String?   @unique
+  image        String?
+  stripeId     String?
 
   group      Group[]
   membership Members[]
@@ -28,6 +31,16 @@ model User {
   likes      Like[]
   comments   Comment[]
   message    Message[]
+  sessions   Session[]
+}
+
+model Session {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  token     String   @unique
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 model Subscription {

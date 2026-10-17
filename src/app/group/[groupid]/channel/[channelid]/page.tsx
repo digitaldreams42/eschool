@@ -1,10 +1,9 @@
 import { onAuthenticatedUser } from "@/actions/auth"
 import { onGetChannelInfo } from "@/actions/channels"
 import { onGetGroupInfo } from "@/actions/groups"
-
 import { LeaderBoardCard } from "@/app/group/_components/leaderboard"
 import GroupSideWidget from "@/components/global/group-side-widget"
-import { currentUser } from "@clerk/nextjs/server"
+import { getSession } from "@/lib/auth"
 import {
   HydrationBoundary,
   QueryClient,
@@ -20,7 +19,7 @@ type Props = {
 
 const GroupChannelPage = async ({ params }: Props) => {
   const client = new QueryClient()
-  const user = await currentUser()
+  const session = await getSession()
   const authUser = await onAuthenticatedUser()
 
   await client.prefetchQuery({
@@ -42,9 +41,9 @@ const GroupChannelPage = async ({ params }: Props) => {
         <div className="lg:col-span-2 flex flex-col gap-y-5 py-5">
           <Menu orientation="desktop" />
           <CreateNewPost
-            userImage={user?.imageUrl!}
+            userImage={session?.image || ""}
             channelid={params.channelid}
-            username={user?.firstName!}
+            username={session?.firstname || ""}
           />
 
           <PostFeed channelid={params.channelid} userid={authUser.id!} />

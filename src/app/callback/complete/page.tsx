@@ -1,24 +1,12 @@
-import { onSignUpUser } from "@/actions/auth"
-import { currentUser } from "@clerk/nextjs/server"
+import { getSession } from "@/lib/auth"
 import { redirect } from "next/navigation"
 
 const CompleteOAuthAfterCallback = async () => {
-  const user = await currentUser()
-  if (!user) redirect("/sign-in")
-  const complete = await onSignUpUser({
-    firstname: user.firstName as string,
-    lastname: user.lastName as string,
-    image: user.imageUrl,
-    clerkId: user.id,
-  })
+  const session = await getSession()
+  if (!session) redirect("/sign-in")
 
-  if (complete.status == 200) {
-    redirect(`/group/create`)
-  }
-
-  if (complete.status !== 200) {
-    redirect("/sign-in")
-  }
+  // User already exists in DB (created during OAuth flow)
+  redirect(`/group/create`)
 }
 
 export default CompleteOAuthAfterCallback

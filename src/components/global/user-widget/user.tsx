@@ -6,7 +6,7 @@ import { Logout, Settings } from "@/icons"
 import { supabaseClient } from "@/lib/utils"
 import { onOffline } from "@/redux/slices/online-member-slice"
 import { AppDispatch } from "@/redux/store"
-import { useClerk } from "@clerk/nextjs"
+import { useAuth } from "@/hooks/use-auth"
 import Link from "next/link"
 import { useDispatch } from "react-redux"
 import { DropDown } from "../drop-down"
@@ -18,7 +18,7 @@ type UserWidgetProps = {
 }
 
 export const UserAvatar = ({ image, groupid, userid }: UserWidgetProps) => {
-  const { signOut } = useClerk()
+  const { signOut } = useAuth()
 
   const untrackPresence = async () => {
     await supabaseClient.channel("tracking").untrack()
@@ -29,7 +29,8 @@ export const UserAvatar = ({ image, groupid, userid }: UserWidgetProps) => {
   const onLogout = async () => {
     untrackPresence()
     dispatch(onOffline({ members: [{ id: userid! }] }))
-    signOut({ redirectUrl: "/" })
+    await signOut()
+    window.location.href = "/"
   }
 
   return (

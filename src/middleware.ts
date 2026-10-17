@@ -1,7 +1,6 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
-const isProtectedRoute = createRouteMatcher(["/group(.*)"])
+const SESSION_COOKIE = process.env.AUTH_COOKIE_NAME || "auth_session"
 
 /**
  * Hosts that belong to the platform itself. These are never tenant custom
@@ -12,13 +11,20 @@ const PLATFORM_HOSTS = [".vercel.app", "localhost", "127.0.0.1", ".local"]
 const isPlatformHost = (host: string) =>
   PLATFORM_HOSTS.some((suffix) => host === suffix || host.includes(suffix))
 
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
-    auth().protect()
+export default async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl
+
+  // Check session for protected routes
+  if (pathname.startsWith("/group")) {
+    const sessionToken = req.cookies.get(SESSION_COOKIE)?.value
+    if (!sessionToken) {
+      const signInUrl = new URL("/sign-in", req.url)
+      return NextResponse.redirect(signInUrl)
+    }
   }
 
   const host = req.headers.get("host") ?? ""
-  const reqPath = req.nextUrl.pathname
+  const reqPath = pathname
 
   // Tenant custom-domain rewrite (serve a group on the owner's own domain).
   //
@@ -28,7 +34,7 @@ export default clerkMiddleware(async (auth, req) => {
   // middleware with MIDDLEWARE_INVOCATION_FAILED. It is now best-effort:
   // any failure falls through to normal routing.
   if (!reqPath.startsWith("/group") || isPlatformHost(host)) {
-    return
+    return NextResponse.next()
   }
 
   try {
@@ -37,7 +43,7 @@ export default clerkMiddleware(async (auth, req) => {
       { method: "GET", headers: { "Content-Type": "application/json" } },
     )
 
-    if (!res.ok) return
+    if (!res.ok) return NextResponse.next()
 
     const data = await res.json()
     const domain = typeof data?.domain === "string" ? data.domain : null
@@ -47,9 +53,11 @@ export default clerkMiddleware(async (auth, req) => {
     }
   } catch {
     // Best-effort only — never let domain resolution break the app.
-    return
+    return NextResponse.next()
   }
-})
+
+  return NextResponse.next()
+}
 
 export const config = {
   matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],

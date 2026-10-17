@@ -1,7 +1,7 @@
 import { MuiThemeProviderWrapper } from "@/theme/provider"
 import { ReactQueryProvider } from "@/react-query/provider"
 import { ReduxProvider } from "@/redux/provider"
-import { ClerkProvider } from "@clerk/nextjs"
+import { AuthProvider } from "@/components/auth-provider"
 import type { Metadata } from "next"
 import { Toaster } from "sonner"
 import "./global.css"
@@ -25,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
+    <AuthProvider>
       <html lang="en" suppressHydrationWarning>
         <head>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -49,6 +49,6 @@ export default function RootLayout({
           </MuiThemeProviderWrapper>
         </body>
       </html>
-    </ClerkProvider>
+    </AuthProvider>
   )
 }
